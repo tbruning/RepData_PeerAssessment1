@@ -1,5 +1,6 @@
 ## Introduction
-Tom Bruning
+Tom Bruning  
+
 This is a test
 
 It is now possible to collect a large amount of data about personal

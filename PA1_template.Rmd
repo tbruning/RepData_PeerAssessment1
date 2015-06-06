@@ -1,13 +1,27 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "Tom Bruning"
 output: 
   html_document:
     keep_md: true
 ---
-This is just a test
-This is the second test
+
+## Initial setup
+
+```{r required packages, warning=FALSE, message=FALSE}
+require(dplyr)
+require(tidyr)
+require(ggplot2)
+require(xtables)
+require(data.table)
+```
 
 ## Loading and preprocessing the data
+Since I am using a static file, downloaded once I am not including downloading the file step.  
+I use the data table package since running in tables is faster than running as data frames.
+```{r read table}
+DT <- read.table("activity.csv", sep = ",", header = TRUE)
+glimpse(DT)
 
 
 

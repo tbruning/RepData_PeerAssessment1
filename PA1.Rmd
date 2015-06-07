@@ -1,0 +1,74 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "Tom Bruning"
+output: 
+  html_document:
+    keep_md: true
+---
+
+### Initial setup
+
+```{r required packages, warning=FALSE, message=FALSE}
+require(dplyr)
+require(tidyr)
+require(ggplot2)
+require(data.table)
+require(xtable)
+options(scipen = 1)
+```
+
+### Loading and preprocessing the data
+Since I am using a static file, downloaded and unzipped once I am not including downloading the file step.  
+I use the data table package since running in tables is faster than running as data frames.
+```{r read table}
+DT <- read.table("activity.csv", sep = ",", header = TRUE)
+```
+Create time interval using hour and minute
+```{r create time}
+DT1 <- DT %>% 
+    mutate(hour = floor(interval / 100)) %>% 
+    mutate(min = ifelse(hour < 1, interval, interval - 100 * hour)) %>%
+    mutate(hour1 = ifelse(hour < 10, paste0("0", hour, sep = ""), hour)) %>% 
+    mutate(min1 = ifelse(min < 10, paste0("0", min, sep = ""), min)) %>% 
+    mutate(time = paste(hour1, ":", min1, sep = "")) %>% 
+    select(steps, date, time)
+glimpse(DT1)
+```
+Delete missing values
+```{r delete missing values}
+DT_comp <- na.omit(DT1)
+DT_comp$steps <- as.numeric((DT_comp$steps)) 
+glimpse(DT_comp)
+```
+### What is mean total number of steps taken per day?
+```{r histogram}
+dt_summ <- 
+    DT_comp %>% 
+    group_by(date) %>% 
+    summarise(tot = (sum(steps)))
+hist(dt_summ$tot,
+     xlab ="Steps",
+     main = "Step per Day"
+     )
+mean <- prettyNum(mean <- round(mean(dt_summ$tot),0), big.mark = ",")
+median <- prettyNum(median <- round(median(dt_summ$tot),0), big.mark = ",")
+```
+
+#### The mean number of steps per day is `r mean`. The median number of steps per day is `r median`.
+
+### What is the average daily activity pattern?
+```{r daily}
+
+
+```
+
+
+
+
+
+### Imputing missing values
+
+
+
+### Are there differences in activity patterns between weekdays and weekends?
+

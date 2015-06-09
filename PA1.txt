@@ -1,0 +1,650 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "Tom Bruning"
+output: 
+html_document:
+keep_md: true
+---
+
+### Initial setup
+
+
+```r
+require(dplyr)
+require(tidyr)
+require(ggplot2)
+require(data.table)
+require(xtable)
+require(lubridate)
+require(ggvis)
+options(scipen = 1)
+```
+
+### Loading and preprocessing the data
+Since I am using a static file, downloaded and unzipped once I am not including downloading the file step.  
+I use the data table package since running in tables is faster than running as data frames.
+
+```r
+DT <- read.table("activity.csv", sep = ",", header = TRUE)
+```
+Create time interval using hour and minute
+
+```r
+DT1 <- DT %>% 
+    mutate(hour = floor(interval / 100)) %>% 
+    mutate(min = ifelse(hour < 1, interval, interval - 100 * hour)) %>%
+    mutate(hour1 = ifelse(hour < 10, paste0("0", hour, sep = ""), hour)) %>% 
+    mutate(min1 = ifelse(min < 10, paste0("0", min, sep = ""), min)) %>% 
+    mutate(time = paste(hour1, ":", min1, sep = "")) %>% 
+    select(steps, date, time)
+```
+Delete missing values
+
+```r
+DT_comp <- na.omit(DT1)
+DT_comp$steps <- as.numeric((DT_comp$steps)) 
+```
+### What is mean total number of steps taken per day?
+
+```r
+dt_summ <- 
+    DT_comp %>% 
+    group_by(date) %>% 
+    summarise(tot = (sum(steps)))
+dt_summ %>% 
+    ggvis(~tot, fill := "white" ) %>% 
+    layer_histograms( width = 5000, center = 7500) %>% 
+    add_axis("x", title = "Steps", values = seq(0, 25000, by = 5000)) %>% 
+    add_axis("y", title = "Frequency")
+```
+
+<!--html_preserve--><div id="plot_id570126667-container" class="ggvis-output-container">
+<div id="plot_id570126667" class="ggvis-output"></div>
+<div class="plot-gear-icon">
+<nav class="ggvis-control">
+<a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
+<ul class="ggvis-dropdown">
+<li>
+Renderer: 
+<a id="plot_id570126667_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id570126667" data-renderer="svg">SVG</a>
+ | 
+<a id="plot_id570126667_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id570126667" data-renderer="canvas">Canvas</a>
+</li>
+<li>
+<a id="plot_id570126667_download" class="ggvis-download" data-plot-id="plot_id570126667">Download</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<script type="text/javascript">
+var plot_id570126667_spec = {
+  "data": [
+    {
+      "name": ".0/bin1/stack2",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "xmin_": "number",
+          "xmax_": "number",
+          "stack_upr_": "number",
+          "stack_lwr_": "number"
+        }
+      },
+      "values": "\"xmin_\",\"xmax_\",\"stack_upr_\",\"stack_lwr_\"\n0,5000,5,0\n5000,10000,12,0\n10000,15000,28,0\n15000,20000,6,0\n20000,25000,2,0"
+    },
+    {
+      "name": "scale/x",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "domain": "number"
+        }
+      },
+      "values": "\"domain\"\n-1250\n26250"
+    },
+    {
+      "name": "scale/y",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "domain": "number"
+        }
+      },
+      "values": "\"domain\"\n0\n29.4"
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "domain": {
+        "data": "scale/x",
+        "field": "data.domain"
+      },
+      "zero": false,
+      "nice": false,
+      "clamp": false,
+      "range": "width"
+    },
+    {
+      "name": "y",
+      "domain": {
+        "data": "scale/y",
+        "field": "data.domain"
+      },
+      "zero": false,
+      "nice": false,
+      "clamp": false,
+      "range": "height"
+    }
+  ],
+  "marks": [
+    {
+      "type": "rect",
+      "properties": {
+        "update": {
+          "stroke": {
+            "value": "#000000"
+          },
+          "fill": {
+            "value": "white"
+          },
+          "x": {
+            "scale": "x",
+            "field": "data.xmin_"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "data.xmax_"
+          },
+          "y": {
+            "scale": "y",
+            "field": "data.stack_upr_"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "data.stack_lwr_"
+          }
+        },
+        "ggvis": {
+          "data": {
+            "value": ".0/bin1/stack2"
+          }
+        }
+      },
+      "from": {
+        "data": ".0/bin1/stack2"
+      }
+    }
+  ],
+  "legends": [],
+  "axes": [
+    {
+      "type": "x",
+      "scale": "x",
+      "orient": "bottom",
+      "title": "Steps",
+      "values": [0, 5000, 10000, 15000, 20000, 25000],
+      "layer": "back",
+      "grid": true
+    },
+    {
+      "type": "y",
+      "scale": "y",
+      "orient": "left",
+      "title": "Frequency",
+      "layer": "back",
+      "grid": true
+    }
+  ],
+  "padding": null,
+  "ggvis_opts": {
+    "keep_aspect": false,
+    "resizable": true,
+    "padding": {},
+    "duration": 250,
+    "renderer": "svg",
+    "hover_duration": 0,
+    "width": 360,
+    "height": 288
+  },
+  "handlers": null
+};
+ggvis.getPlot("plot_id570126667").parseSpec(plot_id570126667_spec);
+</script><!--/html_preserve-->
+
+```r
+mean <- prettyNum(mean <- round(mean(dt_summ$tot),0), big.mark = ",")
+median <- prettyNum(median <- round(median(dt_summ$tot),0), big.mark = ",")
+total <- prettyNum(total <- round(sum(dt_summ$tot),0), big.mark = ",")
+```
+
+#### The mean number of steps per day is 10,766. The median number of steps per day is 10,765, and the total number of steps is 570,608.
+
+### What is the average daily activity pattern?
+
+```r
+DT_comp %>% 
+    group_by(time)
+```
+
+```
+## Source: local data frame [15,264 x 3]
+## Groups: time
+## 
+##    steps       date  time
+## 1      0 2012-10-02 00:00
+## 2      0 2012-10-02 00:05
+## 3      0 2012-10-02 00:10
+## 4      0 2012-10-02 00:15
+## 5      0 2012-10-02 00:20
+## 6      0 2012-10-02 00:25
+## 7      0 2012-10-02 00:30
+## 8      0 2012-10-02 00:35
+## 9      0 2012-10-02 00:40
+## 10     0 2012-10-02 00:45
+## ..   ...        ...   ...
+```
+
+```r
+dt_summ_int <- 
+    DT_comp %>% 
+    group_by(time) %>% 
+    summarise(mean = round((mean(steps)), 0))
+dt_summ_int %>% 
+    ggvis(~time, ~mean) %>% 
+    layer_lines(stroke := "red")
+```
+
+<!--html_preserve--><div id="plot_id759523387-container" class="ggvis-output-container">
+<div id="plot_id759523387" class="ggvis-output"></div>
+<div class="plot-gear-icon">
+<nav class="ggvis-control">
+<a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
+<ul class="ggvis-dropdown">
+<li>
+Renderer: 
+<a id="plot_id759523387_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id759523387" data-renderer="svg">SVG</a>
+ | 
+<a id="plot_id759523387_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id759523387" data-renderer="canvas">Canvas</a>
+</li>
+<li>
+<a id="plot_id759523387_download" class="ggvis-download" data-plot-id="plot_id759523387">Download</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<script type="text/javascript">
+var plot_id759523387_spec = {
+  "data": [
+    {
+      "name": ".0/arrange1",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "mean": "number"
+        }
+      },
+      "values": "\"time\",\"mean\"\n\"00:00\",2\n\"00:05\",0\n\"00:10\",0\n\"00:15\",0\n\"00:20\",0\n\"00:25\",2\n\"00:30\",1\n\"00:35\",1\n\"00:40\",0\n\"00:45\",1\n\"00:50\",0\n\"00:55\",0\n\"01:00\",0\n\"01:05\",1\n\"01:10\",0\n\"01:15\",0\n\"01:20\",0\n\"01:25\",1\n\"01:30\",2\n\"01:35\",0\n\"01:40\",0\n\"01:45\",0\n\"01:50\",0\n\"01:55\",0\n\"02:00\",0\n\"02:05\",0\n\"02:10\",1\n\"02:15\",0\n\"02:20\",0\n\"02:25\",0\n\"02:30\",0\n\"02:35\",0\n\"02:40\",0\n\"02:45\",0\n\"02:50\",2\n\"02:55\",1\n\"03:00\",0\n\"03:05\",0\n\"03:10\",0\n\"03:15\",0\n\"03:20\",0\n\"03:25\",1\n\"03:30\",2\n\"03:35\",1\n\"03:40\",0\n\"03:45\",0\n\"03:50\",0\n\"03:55\",0\n\"04:00\",1\n\"04:05\",1\n\"04:10\",3\n\"04:15\",0\n\"04:20\",0\n\"04:25\",0\n\"04:30\",4\n\"04:35\",1\n\"04:40\",3\n\"04:45\",1\n\"04:50\",3\n\"04:55\",1\n\"05:00\",0\n\"05:05\",2\n\"05:10\",3\n\"05:15\",2\n\"05:20\",3\n\"05:25\",3\n\"05:30\",2\n\"05:35\",6\n\"05:40\",16\n\"05:45\",18\n\"05:50\",39\n\"05:55\",44\n\"06:00\",31\n\"06:05\",49\n\"06:10\",54\n\"06:15\",63\n\"06:20\",50\n\"06:25\",47\n\"06:30\",52\n\"06:35\",39\n\"06:40\",44\n\"06:45\",44\n\"06:50\",37\n\"06:55\",49\n\"07:00\",44\n\"07:05\",44\n\"07:10\",51\n\"07:15\",55\n\"07:20\",50\n\"07:25\",51\n\"07:30\",56\n\"07:35\",44\n\"07:40\",52\n\"07:45\",70\n\"07:50\",58\n\"07:55\",56\n\"08:00\",73\n\"08:05\",68\n\"08:10\",129\n\"08:15\",158\n\"08:20\",171\n\"08:25\",155\n\"08:30\",177\n\"08:35\",206\n\"08:40\",196\n\"08:45\",180\n\"08:50\",183\n\"08:55\",167\n\"09:00\",143\n\"09:05\",124\n\"09:10\",109\n\"09:15\",108\n\"09:20\",104\n\"09:25\",96\n\"09:30\",66\n\"09:35\",45\n\"09:40\",25\n\"09:45\",39\n\"09:50\",35\n\"09:55\",21\n\"10:00\",41\n\"10:05\",27\n\"10:10\",42\n\"10:15\",53\n\"10:20\",39\n\"10:25\",51\n\"10:30\",44\n\"10:35\",37\n\"10:40\",35\n\"10:45\",28\n\"10:50\",25\n\"10:55\",32\n\"11:00\",31\n\"11:05\",30\n\"11:10\",21\n\"11:15\",26\n\"11:20\",28\n\"11:25\",26\n\"11:30\",33\n\"11:35\",50\n\"11:40\",42\n\"11:45\",45\n\"11:50\",46\n\"11:55\",59\n\"12:00\",64\n\"12:05\",88\n\"12:10\",95\n\"12:15\",93\n\"12:20\",63\n\"12:25\",50\n\"12:30\",54\n\"12:35\",32\n\"12:40\",27\n\"12:45\",38\n\"12:50\",45\n\"12:55\",67\n\"13:00\",42\n\"13:05\",40\n\"13:10\",43\n\"13:15\",41\n\"13:20\",46\n\"13:25\",56\n\"13:30\",43\n\"13:35\",25\n\"13:40\",40\n\"13:45\",54\n\"13:50\",47\n\"13:55\",61\n\"14:00\",56\n\"14:05\",52\n\"14:10\",44\n\"14:15\",49\n\"14:20\",35\n\"14:25\",38\n\"14:30\",42\n\"14:35\",28\n\"14:40\",17\n\"14:45\",26\n\"14:50\",44\n\"14:55\",44\n\"15:00\",30\n\"15:05\",36\n\"15:10\",35\n\"15:15\",39\n\"15:20\",46\n\"15:25\",48\n\"15:30\",48\n\"15:35\",65\n\"15:40\",83\n\"15:45\",99\n\"15:50\",102\n\"15:55\",84\n\"16:00\",62\n\"16:05\",64\n\"16:10\",75\n\"16:15\",63\n\"16:20\",57\n\"16:25\",60\n\"16:30\",44\n\"16:35\",39\n\"16:40\",45\n\"16:45\",45\n\"16:50\",46\n\"16:55\",44\n\"17:00\",47\n\"17:05\",56\n\"17:10\",51\n\"17:15\",61\n\"17:20\",73\n\"17:25\",79\n\"17:30\",69\n\"17:35\",60\n\"17:40\",75\n\"17:45\",57\n\"17:50\",35\n\"17:55\",37\n\"18:00\",41\n\"18:05\",58\n\"18:10\",75\n\"18:15\",85\n\"18:20\",59\n\"18:25\",68\n\"18:30\",78\n\"18:35\",74\n\"18:40\",85\n\"18:45\",99\n\"18:50\",87\n\"18:55\",86\n\"19:00\",85\n\"19:05\",78\n\"19:10\",58\n\"19:15\",53\n\"19:20\",36\n\"19:25\",21\n\"19:30\",27\n\"19:35\",40\n\"19:40\",30\n\"19:45\",26\n\"19:50\",46\n\"19:55\",34\n\"20:00\",20\n\"20:05\",19\n\"20:10\",19\n\"20:15\",33\n\"20:20\",27\n\"20:25\",21\n\"20:30\",27\n\"20:35\",21\n\"20:40\",20\n\"20:45\",21\n\"20:50\",32\n\"20:55\",20\n\"21:00\",16\n\"21:05\",17\n\"21:10\",23\n\"21:15\",19\n\"21:20\",12\n\"21:25\",8\n\"21:30\",15\n\"21:35\",16\n\"21:40\",9\n\"21:45\",8\n\"21:50\",8\n\"21:55\",3\n\"22:00\",1\n\"22:05\",4\n\"22:10\",5\n\"22:15\",9\n\"22:20\",7\n\"22:25\",9\n\"22:30\",10\n\"22:35\",2\n\"22:40\",0\n\"22:45\",0\n\"22:50\",2\n\"22:55\",5\n\"23:00\",3\n\"23:05\",3\n\"23:10\",0\n\"23:15\",1\n\"23:20\",1\n\"23:25\",2\n\"23:30\",3\n\"23:35\",5\n\"23:40\",3\n\"23:45\",1\n\"23:50\",0\n\"23:55\",1"
+    },
+    {
+      "name": "scale/x",
+      "format": {
+        "type": "csv",
+        "parse": {}
+      },
+      "values": "\"domain\"\n\"00:00\"\n\"00:05\"\n\"00:10\"\n\"00:15\"\n\"00:20\"\n\"00:25\"\n\"00:30\"\n\"00:35\"\n\"00:40\"\n\"00:45\"\n\"00:50\"\n\"00:55\"\n\"01:00\"\n\"01:05\"\n\"01:10\"\n\"01:15\"\n\"01:20\"\n\"01:25\"\n\"01:30\"\n\"01:35\"\n\"01:40\"\n\"01:45\"\n\"01:50\"\n\"01:55\"\n\"02:00\"\n\"02:05\"\n\"02:10\"\n\"02:15\"\n\"02:20\"\n\"02:25\"\n\"02:30\"\n\"02:35\"\n\"02:40\"\n\"02:45\"\n\"02:50\"\n\"02:55\"\n\"03:00\"\n\"03:05\"\n\"03:10\"\n\"03:15\"\n\"03:20\"\n\"03:25\"\n\"03:30\"\n\"03:35\"\n\"03:40\"\n\"03:45\"\n\"03:50\"\n\"03:55\"\n\"04:00\"\n\"04:05\"\n\"04:10\"\n\"04:15\"\n\"04:20\"\n\"04:25\"\n\"04:30\"\n\"04:35\"\n\"04:40\"\n\"04:45\"\n\"04:50\"\n\"04:55\"\n\"05:00\"\n\"05:05\"\n\"05:10\"\n\"05:15\"\n\"05:20\"\n\"05:25\"\n\"05:30\"\n\"05:35\"\n\"05:40\"\n\"05:45\"\n\"05:50\"\n\"05:55\"\n\"06:00\"\n\"06:05\"\n\"06:10\"\n\"06:15\"\n\"06:20\"\n\"06:25\"\n\"06:30\"\n\"06:35\"\n\"06:40\"\n\"06:45\"\n\"06:50\"\n\"06:55\"\n\"07:00\"\n\"07:05\"\n\"07:10\"\n\"07:15\"\n\"07:20\"\n\"07:25\"\n\"07:30\"\n\"07:35\"\n\"07:40\"\n\"07:45\"\n\"07:50\"\n\"07:55\"\n\"08:00\"\n\"08:05\"\n\"08:10\"\n\"08:15\"\n\"08:20\"\n\"08:25\"\n\"08:30\"\n\"08:35\"\n\"08:40\"\n\"08:45\"\n\"08:50\"\n\"08:55\"\n\"09:00\"\n\"09:05\"\n\"09:10\"\n\"09:15\"\n\"09:20\"\n\"09:25\"\n\"09:30\"\n\"09:35\"\n\"09:40\"\n\"09:45\"\n\"09:50\"\n\"09:55\"\n\"10:00\"\n\"10:05\"\n\"10:10\"\n\"10:15\"\n\"10:20\"\n\"10:25\"\n\"10:30\"\n\"10:35\"\n\"10:40\"\n\"10:45\"\n\"10:50\"\n\"10:55\"\n\"11:00\"\n\"11:05\"\n\"11:10\"\n\"11:15\"\n\"11:20\"\n\"11:25\"\n\"11:30\"\n\"11:35\"\n\"11:40\"\n\"11:45\"\n\"11:50\"\n\"11:55\"\n\"12:00\"\n\"12:05\"\n\"12:10\"\n\"12:15\"\n\"12:20\"\n\"12:25\"\n\"12:30\"\n\"12:35\"\n\"12:40\"\n\"12:45\"\n\"12:50\"\n\"12:55\"\n\"13:00\"\n\"13:05\"\n\"13:10\"\n\"13:15\"\n\"13:20\"\n\"13:25\"\n\"13:30\"\n\"13:35\"\n\"13:40\"\n\"13:45\"\n\"13:50\"\n\"13:55\"\n\"14:00\"\n\"14:05\"\n\"14:10\"\n\"14:15\"\n\"14:20\"\n\"14:25\"\n\"14:30\"\n\"14:35\"\n\"14:40\"\n\"14:45\"\n\"14:50\"\n\"14:55\"\n\"15:00\"\n\"15:05\"\n\"15:10\"\n\"15:15\"\n\"15:20\"\n\"15:25\"\n\"15:30\"\n\"15:35\"\n\"15:40\"\n\"15:45\"\n\"15:50\"\n\"15:55\"\n\"16:00\"\n\"16:05\"\n\"16:10\"\n\"16:15\"\n\"16:20\"\n\"16:25\"\n\"16:30\"\n\"16:35\"\n\"16:40\"\n\"16:45\"\n\"16:50\"\n\"16:55\"\n\"17:00\"\n\"17:05\"\n\"17:10\"\n\"17:15\"\n\"17:20\"\n\"17:25\"\n\"17:30\"\n\"17:35\"\n\"17:40\"\n\"17:45\"\n\"17:50\"\n\"17:55\"\n\"18:00\"\n\"18:05\"\n\"18:10\"\n\"18:15\"\n\"18:20\"\n\"18:25\"\n\"18:30\"\n\"18:35\"\n\"18:40\"\n\"18:45\"\n\"18:50\"\n\"18:55\"\n\"19:00\"\n\"19:05\"\n\"19:10\"\n\"19:15\"\n\"19:20\"\n\"19:25\"\n\"19:30\"\n\"19:35\"\n\"19:40\"\n\"19:45\"\n\"19:50\"\n\"19:55\"\n\"20:00\"\n\"20:05\"\n\"20:10\"\n\"20:15\"\n\"20:20\"\n\"20:25\"\n\"20:30\"\n\"20:35\"\n\"20:40\"\n\"20:45\"\n\"20:50\"\n\"20:55\"\n\"21:00\"\n\"21:05\"\n\"21:10\"\n\"21:15\"\n\"21:20\"\n\"21:25\"\n\"21:30\"\n\"21:35\"\n\"21:40\"\n\"21:45\"\n\"21:50\"\n\"21:55\"\n\"22:00\"\n\"22:05\"\n\"22:10\"\n\"22:15\"\n\"22:20\"\n\"22:25\"\n\"22:30\"\n\"22:35\"\n\"22:40\"\n\"22:45\"\n\"22:50\"\n\"22:55\"\n\"23:00\"\n\"23:05\"\n\"23:10\"\n\"23:15\"\n\"23:20\"\n\"23:25\"\n\"23:30\"\n\"23:35\"\n\"23:40\"\n\"23:45\"\n\"23:50\"\n\"23:55\""
+    },
+    {
+      "name": "scale/y",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "domain": "number"
+        }
+      },
+      "values": "\"domain\"\n-10.3\n216.3"
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "ordinal",
+      "domain": {
+        "data": "scale/x",
+        "field": "data.domain"
+      },
+      "points": true,
+      "sort": false,
+      "range": "width",
+      "padding": 0.5
+    },
+    {
+      "name": "y",
+      "domain": {
+        "data": "scale/y",
+        "field": "data.domain"
+      },
+      "zero": false,
+      "nice": false,
+      "clamp": false,
+      "range": "height"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "properties": {
+        "update": {
+          "x": {
+            "scale": "x",
+            "field": "data.time"
+          },
+          "y": {
+            "scale": "y",
+            "field": "data.mean"
+          },
+          "stroke": {
+            "value": "red"
+          }
+        },
+        "ggvis": {
+          "data": {
+            "value": ".0/arrange1"
+          }
+        }
+      },
+      "from": {
+        "data": ".0/arrange1"
+      }
+    }
+  ],
+  "legends": [],
+  "axes": [
+    {
+      "type": "x",
+      "scale": "x",
+      "orient": "bottom",
+      "layer": "back",
+      "grid": true,
+      "title": "time"
+    },
+    {
+      "type": "y",
+      "scale": "y",
+      "orient": "left",
+      "layer": "back",
+      "grid": true,
+      "title": "mean"
+    }
+  ],
+  "padding": null,
+  "ggvis_opts": {
+    "keep_aspect": false,
+    "resizable": true,
+    "padding": {},
+    "duration": 250,
+    "renderer": "svg",
+    "hover_duration": 0,
+    "width": 288,
+    "height": 216
+  },
+  "handlers": null
+};
+ggvis.getPlot("plot_id759523387").parseSpec(plot_id759523387_spec);
+</script><!--/html_preserve-->
+
+### Imputing missing values
+
+
+```r
+# Calculate number of missing values.
+y <- which(is.na(DT1)==TRUE)
+y_len <-  prettyNum(length(y), big.mark = ",")
+# Create summary of the mean of the data by time intervals
+dt_summ <- 
+    DT_comp %>% 
+    group_by(time) %>% 
+    summarise(mean = mean(steps))
+# Create copy of original data and populate NA's with meaan of the interval over the data set.
+DT2 <- DT1
+DT2$steps[y] <- round(dt_summ$mean[match(dt_summ$time, DT2$time)],0)
+dt_summ_new <- 
+    DT2 %>% 
+    group_by(date) %>% 
+    summarise(tot = sum(steps))
+# Create new histogram
+dt_summ_new %>% 
+    ggvis(~tot, fill := "white" ) %>% 
+    layer_histograms( width = 5000, center = 7500) %>% 
+    add_axis("x", title = "Steps", values = seq(0, 25000, by = 5000)) %>% 
+    add_axis("y", title = "Frequency")
+```
+
+<!--html_preserve--><div id="plot_id474921202-container" class="ggvis-output-container">
+<div id="plot_id474921202" class="ggvis-output"></div>
+<div class="plot-gear-icon">
+<nav class="ggvis-control">
+<a class="ggvis-dropdown-toggle" title="Controls" onclick="return false;"></a>
+<ul class="ggvis-dropdown">
+<li>
+Renderer: 
+<a id="plot_id474921202_renderer_svg" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id474921202" data-renderer="svg">SVG</a>
+ | 
+<a id="plot_id474921202_renderer_canvas" class="ggvis-renderer-button" onclick="return false;" data-plot-id="plot_id474921202" data-renderer="canvas">Canvas</a>
+</li>
+<li>
+<a id="plot_id474921202_download" class="ggvis-download" data-plot-id="plot_id474921202">Download</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<script type="text/javascript">
+var plot_id474921202_spec = {
+  "data": [
+    {
+      "name": ".0/bin1/stack2",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "xmin_": "number",
+          "xmax_": "number",
+          "stack_upr_": "number",
+          "stack_lwr_": "number"
+        }
+      },
+      "values": "\"xmin_\",\"xmax_\",\"stack_upr_\",\"stack_lwr_\"\n0,5000,5,0\n5000,10000,12,0\n10000,15000,36,0\n15000,20000,6,0\n20000,25000,2,0"
+    },
+    {
+      "name": "scale/x",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "domain": "number"
+        }
+      },
+      "values": "\"domain\"\n-1250\n26250"
+    },
+    {
+      "name": "scale/y",
+      "format": {
+        "type": "csv",
+        "parse": {
+          "domain": "number"
+        }
+      },
+      "values": "\"domain\"\n0\n37.8"
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "domain": {
+        "data": "scale/x",
+        "field": "data.domain"
+      },
+      "zero": false,
+      "nice": false,
+      "clamp": false,
+      "range": "width"
+    },
+    {
+      "name": "y",
+      "domain": {
+        "data": "scale/y",
+        "field": "data.domain"
+      },
+      "zero": false,
+      "nice": false,
+      "clamp": false,
+      "range": "height"
+    }
+  ],
+  "marks": [
+    {
+      "type": "rect",
+      "properties": {
+        "update": {
+          "stroke": {
+            "value": "#000000"
+          },
+          "fill": {
+            "value": "white"
+          },
+          "x": {
+            "scale": "x",
+            "field": "data.xmin_"
+          },
+          "x2": {
+            "scale": "x",
+            "field": "data.xmax_"
+          },
+          "y": {
+            "scale": "y",
+            "field": "data.stack_upr_"
+          },
+          "y2": {
+            "scale": "y",
+            "field": "data.stack_lwr_"
+          }
+        },
+        "ggvis": {
+          "data": {
+            "value": ".0/bin1/stack2"
+          }
+        }
+      },
+      "from": {
+        "data": ".0/bin1/stack2"
+      }
+    }
+  ],
+  "legends": [],
+  "axes": [
+    {
+      "type": "x",
+      "scale": "x",
+      "orient": "bottom",
+      "title": "Steps",
+      "values": [0, 5000, 10000, 15000, 20000, 25000],
+      "layer": "back",
+      "grid": true
+    },
+    {
+      "type": "y",
+      "scale": "y",
+      "orient": "left",
+      "title": "Frequency",
+      "layer": "back",
+      "grid": true
+    }
+  ],
+  "padding": null,
+  "ggvis_opts": {
+    "keep_aspect": false,
+    "resizable": true,
+    "padding": {},
+    "duration": 250,
+    "renderer": "svg",
+    "hover_duration": 0,
+    "width": 288,
+    "height": 216
+  },
+  "handlers": null
+};
+ggvis.getPlot("plot_id474921202").parseSpec(plot_id474921202_spec);
+</script><!--/html_preserve-->
+
+`
+
+
+```r
+dt_summ <- 
+    DT_comp %>% 
+    group_by(date) %>% 
+    summarise(tot = (sum(steps)))
+tot <- sum(dt_summ$tot)
+mean <- mean(dt_summ$tot)
+median <- median(dt_summ$tot)
+old_data <- c(mean, median, tot)
+new_tot <- sum(dt_summ_new$tot)
+new_mean <- round(mean(dt_summ_new$tot), 0)
+new_median <- median(dt_summ_new$tot)
+rnames <- tbl_dt(c("mean", "median", "total"))
+old_data <- c(mean, median, tot)
+new_data <- c(new_mean, new_median, new_tot)
+new_data <- tbl_dt(new_data)
+old_data <- tbl_dt(old_data)
+rnames <- tbl_dt(c("mean", "median", "total"))
+new_tbl <- bind_cols(rnames, old_data, new_data)
+names(new_tbl) <- c("Value", "Omitted", "Imputed")
+# new_tbl <- as.data.frame(new_tbl)
+ptable <- xtable(new_tbl, format = "html", digits=0, caption = c("Comparision of omitted vs. imputted values"))
+```
+The number of NA's in the original data set is 2,304.
+new mean 10766, new median 10762, new total 6.56704 &times; 10<sup>5</sup>``r
+print(ptable, type = "html", include.rownames = FALSE)
+```
+
+<!-- html table generated in R 3.2.0 by xtable 1.7-4 package -->
+<!-- Tue Jun  9 07:21:25 2015 -->
+<table border=1>
+<caption align="bottom"> Comparision of omitted vs. imputted values </caption>
+<tr> <th> Value </th> <th> Omitted </th> <th> Imputed </th>  </tr>
+  <tr> <td> mean </td> <td align="right"> 10766 </td> <td align="right"> 10766 </td> </tr>
+  <tr> <td> median </td> <td align="right"> 10765 </td> <td align="right"> 10762 </td> </tr>
+  <tr> <td> total </td> <td align="right"> 570608 </td> <td align="right"> 656704 </td> </tr>
+   </table>
+
+##### To replace the omitted data I used the mean data collected for each interval.  When placing this data in the data table it doesn't affect the mean at all, it only affects the median slightly, but it has a huge effect on the total number of steps taken over the period.  Adding a small data value to the missing values (2,304 NA's) increases the total number of steps taken.
+
+### Are there differences in activity patterns between weekdays and weekends?
+
+```r
+dt3 <- DT2
+dt3$date <- ymd(dt3$date)
+dt3 <- dt3 %>%
+    mutate(wd = wday(date))
+
+dt3 <- dt3 %>% 
+    mutate(wdind = ifelse((wd == 7 | wd == 1), "weekend", "weekday"))
+dt3_summ <- dt3 %>% 
+    group_by(wdind, time) %>% 
+    summarise(mean = round(mean(steps),0))
+dt3_summ <- group_by(dt3_summ, wdind)
+sp <- ggplot(dt3_summ, aes(x=time, y=mean, group=wdind)) + geom_line(col = "red")
+sp <- sp + facet_wrap( ~ wdind, ncol=1)
+sp
+```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
+Two of the principal differences between weekdays and weekends is the the subject:  
+1.  wakes (or at least gets out of bed) later on weekends
+    * unordered
+    * another
+1.  doesn't have a large spike in activity early  
+1.  goes back to bed later on weekends
+

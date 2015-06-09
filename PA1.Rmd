@@ -2,8 +2,8 @@
 title: "Reproducible Research: Peer Assessment 1"
 author: "Tom Bruning"
 output: 
-  html_document:
-    keep_md: true
+html_document:
+keep_md: true
 ---
 
 ### Initial setup
@@ -14,6 +14,8 @@ require(tidyr)
 require(ggplot2)
 require(data.table)
 require(xtable)
+require(lubridate)
+require(ggvis)
 options(scipen = 1)
 ```
 
@@ -32,43 +34,104 @@ DT1 <- DT %>%
     mutate(min1 = ifelse(min < 10, paste0("0", min, sep = ""), min)) %>% 
     mutate(time = paste(hour1, ":", min1, sep = "")) %>% 
     select(steps, date, time)
-glimpse(DT1)
 ```
 Delete missing values
 ```{r delete missing values}
 DT_comp <- na.omit(DT1)
 DT_comp$steps <- as.numeric((DT_comp$steps)) 
-glimpse(DT_comp)
 ```
 ### What is mean total number of steps taken per day?
-```{r histogram}
+```{r histogram, fig.height=4, fig.width=5}
 dt_summ <- 
     DT_comp %>% 
     group_by(date) %>% 
     summarise(tot = (sum(steps)))
-hist(dt_summ$tot,
-     xlab ="Steps",
-     main = "Step per Day"
-     )
+dt_summ %>% 
+    ggvis(~tot, fill := "white" ) %>% 
+    layer_histograms( width = 5000, center = 7500) %>% 
+    add_axis("x", title = "Steps", values = seq(0, 25000, by = 5000)) %>% 
+    add_axis("y", title = "Frequency")
+
+
 mean <- prettyNum(mean <- round(mean(dt_summ$tot),0), big.mark = ",")
 median <- prettyNum(median <- round(median(dt_summ$tot),0), big.mark = ",")
+total <- prettyNum(total <- round(sum(dt_summ$tot),0), big.mark = ",")
 ```
 
-#### The mean number of steps per day is `r mean`. The median number of steps per day is `r median`.
+#### The mean number of steps per day is `r mean`. The median number of steps per day is `r median`, and the total number of steps is `r total`.
 
 ### What is the average daily activity pattern?
-```{r daily}
-
-
+``` {r, pattern,fig.height=3, fig.width=4}
+DT_comp %>% 
+    group_by(time)
+dt_summ_int <- 
+    DT_comp %>% 
+    group_by(time) %>% 
+    summarise(mean = round((mean(steps)), 0))
+dt_summ_int %>% 
+    ggvis(~time, ~mean) %>% 
+    layer_lines(stroke := "red")
 ```
-
-
-
-
 
 ### Imputing missing values
 
+```{r missing_values, fig.height=3, fig.width=4}
+# Calculate number of missing values.
+y <- which(is.na(DT1)==TRUE)
+y_len <-  prettyNum(length(y), big.mark = ",")
+# Create summary of the mean of the data by time intervals
+dt_summ <- 
+    DT_comp %>% 
+    group_by(time) %>% 
+    summarise(mean = mean(steps))
+# Create copy of original data and populate NA's with meaan of the interval over the data set.
+DT2 <- DT1
+DT2$steps[y] <- round(dt_summ$mean[match(dt_summ$time, DT2$time)],0)
+dt_summ_new <- 
+    DT2 %>% 
+    group_by(date) %>% 
+    summarise(tot = sum(steps))
+# Create new histogram
+dt_summ_new %>% 
+    ggvis(~tot, fill := "white" ) %>% 
+    layer_histograms( width = 5000, center = 7500) %>% 
+    add_axis("x", title = "Steps", values = seq(0, 25000, by = 5000)) %>% 
+    add_axis("y", title = "Frequency")
+```
 
+`
+
+```{r, results="asis"}
+dt_summ <- 
+    DT_comp %>% 
+    group_by(date) %>% 
+    summarise(tot = (sum(steps)))
+tot <- sum(dt_summ$tot)
+mean <- mean(dt_summ$tot)
+median <- median(dt_summ$tot)
+old_data <- c(mean, median, tot)
+new_tot <- sum(dt_summ_new$tot)
+new_mean <- round(mean(dt_summ_new$tot), 0)
+new_median <- median(dt_summ_new$tot)
+rnames <- tbl_dt(c("mean", "median", "total"))
+old_data <- c(mean, median, tot)
+new_data <- c(new_mean, new_median, new_tot)
+new_data <- tbl_dt(new_data)
+old_data <- tbl_dt(old_data)
+rnames <- tbl_dt(c("mean", "median", "total"))
+new_tbl <- bind_cols(rnames, old_data, new_data)
+names(new_tbl) <- c("Value", "Omitted", "Imputed")
+# new_tbl <- as.data.frame(new_tbl)
+ptable <- xtable(new_tbl, format = "html", digits=0, caption = c("Comparision of omitted vs. imputted values"))
+
+```
+The number of NA's in the original data set is `r y_len`.
+new mean `r new_mean`, new median `r new_median`, new total `r new_tot
+``` {r, results="asis"}
+print(ptable, type = "html", include.rownames = FALSE)
+```
+
+##### To replace the omitted data I used the mean data collected for each interval.  When placing this data in the data table it doesn't affect the mean at all, it only affects the median slightly, but it has a huge effect on the total number of steps taken over the period.  Adding a small data value to the missing values (`r y_len` NA's) increases the total number of steps taken.
 
 ### Are there differences in activity patterns between weekdays and weekends?
 

@@ -49,8 +49,8 @@ dt_summ <-
 
 
 sp <- ggplot(dt_summ, aes(x=tot))
-sp <- sp + geom_histogram(binwidth = 5000, fill = "white", colour = "blue")
-sp  + labs(title = "Omitted Data") + xlab("Steps") + ylab("Frequency")
+sp <- sp + geom_histogram(binwidth = 5000, fill = "white", colour = "darkblue")
+sp  + labs(title = "Data with NA's Omitted") + xlab("Steps") + ylab("Frequency")
 
 mean <- prettyNum(mean <- round(mean(dt_summ$tot),0), big.mark = ",")
 median <- prettyNum(median <- round(median(dt_summ$tot),0), big.mark = ",")
@@ -66,12 +66,10 @@ DT_comp %>%
 dt_summ_int <- 
     DT_comp %>% 
     group_by(time) %>% 
-    summarise(mean = round((mean(steps)), 0)) %>% 
-    ungroup()
-ungroup(dt_summ_int)
+    summarise(mean = round((mean(steps)), 0))
 dt_summ_int <- tbl_df(dt_summ_int)
 sp <- ggplot(dt_summ_int, aes(x=time, y=mean, group=1))
-sp <- sp + geom_line(colour = "red")
+sp <- sp + geom_line(colour = "darkblue")
 sp + labs(title = "Daily Activity") + xlab("Intervals") + ylab("Average Steps")
 
 
@@ -98,12 +96,8 @@ dt_summ_new <-
 
 sp1 <- ggplot(dt_summ_new, aes(x=tot))
 sp1 <- sp1 + geom_histogram(binwidth = 5000, fill = "white", colour = "red")
-sp1 + labs(title = "Imputed Data") + xlab("Steps") + ylab("Frequency")
-```
+sp1 <- sp1 +labs(title = "Imputed Data") + xlab("Steps") + ylab("Frequency")
 
-`
-
-```{r}
 dt_summ <- 
     DT_comp %>% 
     group_by(date) %>% 
@@ -125,10 +119,10 @@ new_tbl <- bind_cols(rnames, old_data, new_data)
 names(new_tbl) <- c("Value", "Omitted", "Imputed")
 # new_tbl <- as.data.frame(new_tbl)
 ptable <- xtable(new_tbl, format = "html", digits=0, caption = c("Comparision of omitted vs. imputted values"))
-
+sp1
 ```
-The number of NA's in the original data set is `r y_len`.
-new mean `r new_mean`, new median `r new_median`, new total `r new_tot`
+
+##### The number of NA's in the original data set is `r y_len`, new mean `r new_mean`, new median `r new_median`, new total `r new_tot`
 ``` {r, results="asis"}
 print(ptable, type = "html", include.rownames = FALSE)
 ```
@@ -157,4 +151,4 @@ Three of the principal differences between weekdays and weekends are:
 
 1. Wakes later
 1. Doesn't have as dramatic an early spike
-1. Goes to bed later
+1. Goes to bed earlier

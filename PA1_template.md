@@ -74,6 +74,17 @@ sp  + labs(title = "Data with NA's Omitted") + xlab("Steps") + ylab("Frequency")
 ![plot of chunk histogram](figure/histogram-1.png) 
 
 ```r
+max_time <- summarise(DT_comp, max_time = max(DT_comp$steps))
+max_time_df <-  filter(DT_comp, steps == max_time$max_time)
+max_time_df
+```
+
+```
+##   steps       date  time
+## 1   806 2012-11-27 06:15
+```
+
+```r
 mean <- prettyNum(mean <- round(mean(dt_summ$tot),0), big.mark = ",")
 median <- prettyNum(median <- round(median(dt_summ$tot),0), big.mark = ",")
 total <- prettyNum(total <- round(sum(dt_summ$tot),0), big.mark = ",")
@@ -81,6 +92,7 @@ total <- prettyNum(total <- round(sum(dt_summ$tot),0), big.mark = ",")
 
 #### The mean number of steps per day is 10,766. The median number of steps per day is 10,765, and the total number of steps is 570,608.
 
+#### The maximun number of steps taken during one interval is 806 taken during the 06:15 interval, on 2012-11-27.
 ### What is the average daily activity pattern?
 
 ```r
@@ -176,7 +188,7 @@ print(ptable, type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 3.2.0 by xtable 1.7-4 package -->
-<!-- Wed Jun 10 21:17:59 2015 -->
+<!-- Wed Jun 10 22:03:47 2015 -->
 <table border=1>
 <caption align="bottom"> Comparision of omitted vs. imputted values </caption>
 <tr> <th> Value </th> <th> Omitted </th> <th> Imputed </th>  </tr>

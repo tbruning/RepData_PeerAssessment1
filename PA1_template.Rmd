@@ -52,6 +52,9 @@ dt_summ <-
 sp <- ggplot(dt_summ, aes(x=tot))
 sp <- sp + geom_histogram(binwidth = 5000, fill = "white", colour = "darkblue")
 sp  + labs(title = "Data with NA's Omitted") + xlab("Steps") + ylab("Frequency")
+max_time <- summarise(DT_comp, max_time = max(DT_comp$steps))
+max_time_df <-  filter(DT_comp, steps == max_time$max_time)
+max_time_df
 
 mean <- prettyNum(mean <- round(mean(dt_summ$tot),0), big.mark = ",")
 median <- prettyNum(median <- round(median(dt_summ$tot),0), big.mark = ",")
@@ -60,6 +63,7 @@ total <- prettyNum(total <- round(sum(dt_summ$tot),0), big.mark = ",")
 
 #### The mean number of steps per day is `r mean`. The median number of steps per day is `r median`, and the total number of steps is `r total`.
 
+#### The maximun number of steps taken during one interval is `r max_time_df$steps` taken during the `r max_time_df$time` interval, on `r max_time_df$date`.
 ### What is the average daily activity pattern?
 ``` {r, pattern,fig.height=3, fig.width=4}
 DT_comp %>% 

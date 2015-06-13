@@ -175,7 +175,7 @@ print(ptable, type = "html", include.rownames = FALSE)
 ```
 
 <!-- html table generated in R 3.2.0 by xtable 1.7-4 package -->
-<!-- Sat Jun 13 06:06:41 2015 -->
+<!-- Sat Jun 13 06:12:57 2015 -->
 <table border=1>
 <caption align="bottom"> Comparision of omitted vs. imputted values </caption>
 <tr> <th> Value </th> <th> Omitted </th> <th> Imputed </th>  </tr>
